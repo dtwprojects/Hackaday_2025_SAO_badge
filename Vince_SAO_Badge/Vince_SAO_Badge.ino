@@ -14,7 +14,14 @@
 #define LED3 0x43
 
 int val = 0xff;
-char tst;
+unsigned long tm = 0;
+unsigned long dt = 0;
+uint16_t read_out_delay = 1500;
+
+void read_out(unsigned long inpt,unsigned int dly=read_out_delay);
+void read_out(int inpt,unsigned int dly=read_out_delay);
+void read_out(uint16_t inpt,unsigned int dly=read_out_delay);
+void read_out(uint8_t inpt,unsigned int dly=read_out_delay);
 
 void setup(){
   TinyWireM.begin();
@@ -38,45 +45,53 @@ void setup(){
   
 }
 
-
 void loop(){
+  tm = micros();
   val = analogRead(SENSOR_PIN);
   while (!digitalRead(BUTTON)){
-    nib_out(val>>8 & 0xf);
-    digitalWrite(LED_PIN,HIGH);
-    delay(1000);
-    nib_out(val>>4 & 0xf);
-    digitalWrite(LED_PIN,LOW);
-    delay(1000);
-    nib_out(val & 0xf);
-    digitalWrite(LED_PIN,HIGH);
-    delay(500);
-    digitalWrite(LED_PIN,LOW);
-    delay(500);
+    read_out(dt);
   }
-//  if (digitalRead(LED_PIN)){
-//    val = analogRead(SENSOR_PIN);
-//    nib_out((val >> 4)&0xff);
-//  } else {
-//    nib_out(val&0xff);
-//  }
-//  digitalWrite(LED_PIN,!digitalRead(LED_PIN));
-//  if (tst >= 0b1111){
-//    tst = 0;
-//  } else {
-//    tst = (tst << 1)|0b1;
-//  }
-//  for (int i=0;i<4;i++){
-//    leddriver_w(0x40+i,255*((tst>>i)&0b1));
-//  }
-//  val = val>>1;
-//  leddriver_w(0x040,val);
-//  leddriver_w(0x041,val);
-//  leddriver_w(0x042,val);
-//  leddriver_w(0x043,val);
-//  if (val == 0){
-//    val = 0xFF;
-//  }
+  dt = micros() - tm;
+}
+
+void read_out(unsigned long inpt,unsigned int dly){
+  for (int i = 0;i < 29; i = i+4){
+    digitalWrite(LED_PIN,HIGH);
+    nib_out((inpt >> (28 - i)) & 0xff);
+    delay(dly);
+    digitalWrite(LED_PIN,LOW);
+    delay(dly);
+  }
+}
+
+void read_out(int inpt,unsigned int dly){
+  for (int i = 0;i < 13; i = i+4){
+    digitalWrite(LED_PIN,HIGH);
+    nib_out((inpt >> (12 - i)) & 0xff);
+    delay(dly);
+    digitalWrite(LED_PIN,LOW);
+    delay(dly);
+  }
+}
+
+void read_out(uint16_t inpt,unsigned int dly){
+  for (int i = 0;i < 13; i = i+4){
+    digitalWrite(LED_PIN,HIGH);
+    nib_out((inpt >> (12 - i)) & 0xff);
+    delay(dly);
+    digitalWrite(LED_PIN,LOW);
+    delay(dly);
+  }
+}
+
+void read_out(uint8_t inpt,unsigned int dly){
+  for (int i = 0;i < 5; i = i+4){
+    digitalWrite(LED_PIN,HIGH);
+    nib_out((inpt >> (4 - i)) & 0xff);
+    delay(dly);
+    digitalWrite(LED_PIN,LOW);
+    delay(dly);
+  }
 }
 
 void all_off(){
